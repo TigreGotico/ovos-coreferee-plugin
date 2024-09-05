@@ -20,7 +20,7 @@ class CorefereeParser:
         self.nlp = spacy.load(model)
         self.nlp.add_pipe("coreferee")
 
-    def replace_corefs(self, text: str) -> str:
+    def replace_corefs(self, text: str, join_tok=None) -> str:
         doc = self.nlp(text)
         # debug print coref
         # doc._.coref_chains.print()
@@ -33,38 +33,39 @@ class CorefereeParser:
                 prev_propn = tok
             elif tok.pos_ == "PRON":
                 if tok.text.lower() in ["me"]:
-                    print(" -", idx, tok, "->", self.first_person)
+                    #print(" -", idx, tok, "->", self.first_person)
                     mapping[idx] = self.first_person
                 elif tok.text.lower() in ["i"]:
-                    print(" -", idx, tok, "->", self.first_person)
+                    #print(" -", idx, tok, "->", self.first_person)
                     mapping[idx] = self.first_person
                     if next_token.text == "have":
                         mapping[idx + 1] = "has"
                     elif next_token.pos_ == "VERB" and next_token.text.endswith("e"):
                         mapping[idx + 1] = next_token.text + "s"
                 elif tok.text.lower() in ["my", "mine"]:
-                    print(" -", idx, tok, "->", self.first_person + "'s")
+                    #print(" -", idx, tok, "->", self.first_person + "'s")
                     mapping[idx] = self.first_person + "'s"
                 elif tok.text.lower() in ["mine"]:
-                    print(" -", idx, tok, "->", "belongs to " + self.first_person)
+                    #print(" -", idx, tok, "->", "belongs to " + self.first_person)
                     mapping[idx] = self.first_person
                     mapping[idx - 1] = "belongs to"
                 elif tok.text.lower() in ["who"] and prev_propn:
-                    print(" -", idx, tok, "->", prev_propn)
+                    #print(" -", idx, tok, "->", prev_propn)
                     mapping[idx] = prev_propn.text
                 elif tok.text.lower() in ["we"]:
                     nouns = [mapping.get(i) or tok.text
                              for i, tok in enumerate(doc[:idx])
                              if tok.pos_ in ['NOUN', 'PROPN', 'PRON']]
-                    if len(nouns) > 2:
+
+                    if len(nouns) == 2 or join_tok is not None:
+                        plural = " and ".join(nouns)
+                        #print(" -", idx, tok, "->", plural)
+                        mapping[idx] = plural
+                    elif len(nouns) > 2:
                         last = nouns[-1]
                         nouns = nouns[:-1]
                         plural = ", ".join(nouns) + " and " + last
-                        print(" -", idx, tok, "->", plural)
-                        mapping[idx] = plural
-                    elif len(nouns) == 2:
-                        plural = " and ".join(nouns)
-                        print(" -", idx, tok, "->", plural)
+                        #print(" -", idx, tok, "->", plural)
                         mapping[idx] = plural
 
         for chain in doc._.coref_chains:
@@ -91,7 +92,7 @@ class CorefereeParser:
                 idx = mention[0]
                 if resolve_tok.text == doc[idx].text:
                     continue
-                print(" -", idx, doc[idx], "->", resolve_tok)
+                #print(" -", idx, doc[idx], "->", resolve_tok)
                 mapping[idx] = resolve_tok.text
 
         for chain in doc._.coref_chains:
@@ -103,7 +104,7 @@ class CorefereeParser:
                     if len(mention) == 1:
                         idx = mention[0]
                         mapping[idx] = joint_str
-                        print(" -", idx, doc[idx], "->", joint_str)
+                        #print(" -", idx, doc[idx], "->", joint_str)
 
         tokens = [mapping.get(idx, t.text)
                   for idx, t in enumerate(doc)]

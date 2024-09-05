@@ -2,9 +2,8 @@ from setuptools import setup
 
 
 PLUGIN_ENTRY_POINT = 'ovos-coreferee-plugin=ovos_coreferee.opm:CorefereeSolver'
-UTTERANCE_ENTRY_POINT = (
-    'ovos-utterance-coreferee-normalizer=ovos_coreferee.opm:CorefereeNormalizerPlugin'
-)
+UTTERANCE_ENTRY_POINT = 'ovos-utterance-coreferee-normalizer=ovos_coreferee.opm:CorefereeNormalizerPlugin'
+TRIPLES_ENTRY_POINT = "ovos-spacy-triples-plugin=ovos_coreferee.triples:SpacyTriplesExtractor"
 setup(
     name='ovos-coreferee-plugin',
     version='0.1.0',
@@ -20,6 +19,7 @@ setup(
     description='OVOS coreference solver',
     entry_points={
         'intentbox.coreference': PLUGIN_ENTRY_POINT,
-        'neon.plugin.text': UTTERANCE_ENTRY_POINT
+        'neon.plugin.text': UTTERANCE_ENTRY_POINT,
+        "opm.triples": TRIPLES_ENTRY_POINT
     }
 )
