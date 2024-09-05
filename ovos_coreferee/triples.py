@@ -163,6 +163,13 @@ class SpacyTriplesExtractor(TriplesExtractor):
         else:
             self.nlp = spacy.load(model)
 
+        if self.config.get("spotlight"):
+            try:
+                self.nlp.add_pipe('dbpedia_spotlight')
+            except Exception as e:
+                print("WARNING - dbpedia spotlight not available! "
+                      "pip install 'spacy_dbpedia_spotlight'")
+
     def extract_triples(self, documents: List[str]) -> Iterable[Tuple[str, str, str]]:
         """Extract semantic triples from a list of documents."""
         parser = DependencyParser()
@@ -183,6 +190,7 @@ class SpacyTriplesExtractor(TriplesExtractor):
 
 if __name__ == "__main__":
     extractor = SpacyTriplesExtractor({"model": "en_core_web_trf",
+                                       "spotlight": True,
                                        "first_person_token": "Miro"})
 
     test = [
@@ -207,4 +215,38 @@ if __name__ == "__main__":
 
     for triple in extractor.extract_triples(test):
         print(triple)
+        # ('Miro', 'love', 'Dii')
+        # ('Miro', 'have', 'dog')
+        # ('Miro', 'be', 'developer')
+        # ('beer', 'be', 'nice')
+        # ('name', 'be', 'Miro')
+        # ('Miro', 'like', 'beer')
+        # ('Mike', 'be', 'guy')
+        # ('Chris', 'be', 'asshole')
+        # ('Apple', 'founded in', 'Cupertino')
+        # ('Apple', 'founded in', 'year')
+        # ('Barrack Obama', 'born in', 'Hawaii')
+        # ('Obama', 'be', 'president')
+        # ('Obama', 'live in', 'White House')
+        # ('London', 'been for', 'millennia')
+        # ('London', 'be', 'settlement')
+        # ('Romans', 'name', 'settlement')
+        # ('Romans', 'name', 'Londinium')
+        # ('Peter', 'travelled to', 'Spain')
+        # ('He', 'be', 'busy')
+        # ('Peter', 'have', 'enough')
+        # ('Peter', 'need', 'holiday')
+        # ('wife', 'need', 'holiday')
+        # ('Peter', 'love', 'Spain')
+        # ('wife', 'love', 'Spain')
+        # ('name', 'be', 'Miro')
+        # ('Miro', 'like', 'beer')
+        # ('ring', 'be', 'Miro')
+        # ('Miro', 'love', 'baby')
+        # ('Miro', 'have', 'dog')
+        # ('Miro', 'be', 'family')
+        # ('dog', 'be', 'family')
+        # ('cat', 'be', 'family')
+        # ('bird', 'be', 'family')
+        # ('Bob', 'like', 'coding')
 
