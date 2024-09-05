@@ -1,0 +1,1 @@
+from ovos_coreferee.parser import CorefereeParser
