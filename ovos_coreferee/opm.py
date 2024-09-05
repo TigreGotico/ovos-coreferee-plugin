@@ -1,12 +1,9 @@
-from ovos_plugin_manager.coreference import CoreferenceSolverEngine
-
-from ovos_coreferee.parser import CorefereeParser
-
-import string
 from typing import Optional, List
 
-import ftfy
+from ovos_plugin_manager.coreference import CoreferenceSolverEngine
 from ovos_plugin_manager.templates.transformers import UtteranceTransformer
+
+from ovos_coreferee.parser import CorefereeParser
 
 
 class CorefereeSolver(CoreferenceSolverEngine):
@@ -29,16 +26,11 @@ class CorefereeNormalizerPlugin(UtteranceTransformer):
 
     def transform(self, utterances: List[str],
                   context: Optional[dict] = None) -> (list, dict):
-        context = context or {}
-        lang = context.get("lang") or self.config.get("lang", "en-us")
 
         norm = []
         for u in utterances:
             norm.append(u)
             norm.append(self.parser.replace_corefs(u))
-
-        if self.config.get("strip_punctuation", True):
-            norm = [self.strip_punctuation(u) for u in norm]
 
         # this deduplicates the list while keeping order
         return list(dict.fromkeys(norm)), context

@@ -1,8 +1,7 @@
-from typing import Tuple, Dict, List
+from typing import Dict
 
 import spacy
 from spacy.cli import download
-from spacy.tokens import Token
 
 
 class CorefereeParser:
@@ -24,12 +23,12 @@ class CorefereeParser:
     def replace_corefs(self, text: str) -> str:
         doc = self.nlp(text)
         # debug print coref
-        #doc._.coref_chains.print()
+        # doc._.coref_chains.print()
 
         mapping: Dict[int, str] = {}
         prev_propn = None
         for idx, tok in enumerate(doc):
-            next_token = doc[idx+1] if idx < len(doc) - 1 else None
+            next_token = doc[idx + 1] if idx < len(doc) - 1 else None
             if tok.pos_ == "PROPN":
                 prev_propn = tok
             elif tok.pos_ == "PRON":
@@ -40,9 +39,9 @@ class CorefereeParser:
                     print(" -", idx, tok, "->", self.first_person)
                     mapping[idx] = self.first_person
                     if next_token.text == "have":
-                        mapping[idx+1] = "has"
+                        mapping[idx + 1] = "has"
                     elif next_token.pos_ == "VERB" and next_token.text.endswith("e"):
-                        mapping[idx+1] = next_token.text + "s"
+                        mapping[idx + 1] = next_token.text + "s"
                 elif tok.text.lower() in ["my", "mine"]:
                     print(" -", idx, tok, "->", self.first_person + "'s")
                     mapping[idx] = self.first_person + "'s"
